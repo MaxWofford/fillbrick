@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Dungeon Generation</title>
+		<style>
+			#image-canvas { overflow: auto; }
+     		fieldset{display:inline;}
+		</style>
+		<meta charset="utf-8">
+		<script src="https://cdn.rawgit.com/konvajs/konva/0.11.1/konva.min.js"></script>
+		<script src="drawImage.js"></script>
+	</head>
+	<body>
+		<div id="image-canvas"></div>
+		<form id="drawForm">
+			<fieldset>
+	    		<legend>Size</legend>
+	    		Width (1-48): <br />
+	    		<input name="width" value="4"><br />
+	    		Height (1-5): <br />
+	    		<input name="height" value="5"><br />
+	    		<input type="submit" value="Change Size">
+	    	</fieldset>
+	    	<fieldset>
+	    		<legend>Drawing Color</legend>
+	    		<input type="radio" name="color" value="0">Off<br />
+	    		<input type="radio" name="color" value="1" checked>On<br />
+	    	</fieldset>
+		</form><br />
+		<button onclick="updateImage()">Submit</button>
+		<p>Result: <span id="result"></span></p>
+	</body>
+</html>
