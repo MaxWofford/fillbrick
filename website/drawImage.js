@@ -1,4 +1,4 @@
-var imageWidth = 80, imageHeight = 7, imageData = [''], pixelSize = 10, imageSettings, mouseDown = false, control = false;
+var imageWidth = 80, imageHeight = 7, imageData = [''], pixelSize = 20, imageSettings, mouseDown = false, control = false;
 
 // Check if new sizes are vaild
 function validateForm(){
