@@ -20,6 +20,13 @@
       </div><!-- /.container -->
     </div>
     <div class="container-fluid">
+      <div class="panel panel-csh">
+        <form id="text-form" action="text">
+	    Text:<br/>
+            <input name="text" value=""><br/>
+            <input type="submit" value="Add Message">
+        </form><br />
+      </div>
       <div class="pdp-ribbon">
         <div id="image-canvas"></div>
       </div>
@@ -39,9 +46,9 @@
             <input type="radio" name="color" value="1" checked>On<br />
           </fieldset>
         </form><br />
-        <button onclick="updateImage()">Submit</button>
-        <p>Result: <span id="result"></span></p>
+        <button onclick="updateImage()">Add Image</button>
       </div>
+      <button onclick="clearBoard()">Clear Board</button>
     </div>
 	</body>
 </html>

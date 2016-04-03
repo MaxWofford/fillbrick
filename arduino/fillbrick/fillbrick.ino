@@ -1,5 +1,6 @@
 #include <SPI.h>
 #include <Ethernet.h>
+#include "MemoryFree.h"
 
 // Mac address
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x0F, 0x12, 0x93 };
@@ -388,6 +389,8 @@ void setup() {
 }
 
 void loop() {
+  Serial.print("freeMemory()=");
+  Serial.println(freeMemory());
   if(millis() - lastDisplayTime > DISPLAY_BREAK_TIME){
     updateData(false);
     for(int a = 0 ; a < dataLength; a++)

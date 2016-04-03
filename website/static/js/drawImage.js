@@ -148,7 +148,33 @@ function updateImage(){
 			binary += '0';
 		result[i] = parseInt((imageData[i]+binary).split('').reverse().join(''), 2);
 	}
-	document.getElementById("result").innerHTML = JSON.stringify(result);
+	
+	// Create form for sending POST
+	var form = document.createElement("form");
+	form.setAttribute('action',"image");
+	form.setAttribute('display',"none");
+	
+	// Create input for size and image
+	var image = document.createElement("input");
+	image.setAttribute('name', "image");
+	image.setAttribute('value', JSON.stringify(result.reverse()));
+	image.setAttribute('type', "hidden");
+	
+	// Add all inputs to the form and send
+	form.appendChild(image);
+	document.body.appendChild(form);
+	form.submit();
+}
+
+function clearBoard(){
+	// Create form for sending POST
+	var form = document.createElement("form");
+	form.setAttribute('action',"clear");
+	form.setAttribute('display',"none");
+	
+	// Add all inputs to the form and send
+	document.body.appendChild(form);
+	form.submit();
 }
 
 document.addEventListener('keydown', function(event) {
