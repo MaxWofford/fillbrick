@@ -146,7 +146,7 @@ function updateImage(){
 		var binary = '';
 		for(var j=imageHeight;j<5;j++)
 			binary += '0';
-		result[i] = parseInt(imageData[i]+binary, 2);
+		result[i] = parseInt((imageData[i]+binary).split('').reverse().join(''), 2);
 	}
 	document.getElementById("result").innerHTML = JSON.stringify(result);
 }

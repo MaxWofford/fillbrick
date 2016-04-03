@@ -4,7 +4,7 @@ var server = require('http').createServer(),
 		port = 80;
 var app = express();
 const CHARACTER_SIZE = 4;
-var data = {bytes:[7,1,13,1,1,13,1,7,0,0,0,0,"apple"], length:0};
+var data = {bytes:[7,1,13,1,1,13,1,7,0,0,0,0,"Jackie"], length:0};
 for(var i=0;i<data.bytes.length;i++)
 	data.length += parseInt(data.bytes[i])===data.bytes[i] ? 1 : data.bytes[i].length*CHARACTER_SIZE;
 

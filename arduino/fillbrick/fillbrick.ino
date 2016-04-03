@@ -14,11 +14,11 @@ const char getReq[] = "GET /data HTTP/1.1";
 IPAddress ip(129, 21, 50, 69);
 
 //Pin connected to ST_CP of 74HC595
-const int LATCHPIN = 12;
+const int LATCHPIN = 8;
 //Pin connected to SH_CP of 74HC595
-const int CLOCKPIN = 11;
+const int CLOCKPIN = 7;
 // Pin connected to DS of 74HC595
-const int DATAPIN = 13;
+const int DATAPIN = 9;
 // Number of pins
 const int BOARDHEIGHT = 5;
 // Delay
@@ -316,7 +316,7 @@ void getCurrentData(bool first){
 
     // Reset the data array to empty with the new size
     if(!first)
-      free(data);
+      delete[] data;
     data = new byte[dataLength];
 
 
@@ -349,16 +349,19 @@ void getCurrentData(bool first){
                 }
               }
             }
+//            for(int l=0;l<(k-1)*CHARACTER_WIDTH;l++)
+//              data[curData++] = 0;
             k = j-k;
-            char* newString = new char[k];
-            newString[k-1] = 0;
-            for(int l=0;l<k-1;l++)
-              newString[l] = data[j+l];
+            char* newString = new char[k+1];
+            newString[k] = 0;
+            for(int l=k;l>0;l--)
+              newString[k-l] = body[j-l];
+            Serial.println(newString);
             byte* newData = stringToBytes(newString, k);
-            for(int l=0;l<(k-1)*CHARACTER_WIDTH;l++)
+            for(int l=0;l<k*CHARACTER_WIDTH;l++)
               data[curData++] = newData[l];
-            free(newString);
-            free(newData);
+            delete[] newString;
+            delete[] newData;
           }
           else{
             int newData = 0;
@@ -376,11 +379,12 @@ void getCurrentData(bool first){
 }
 
 void setup() {
-  setupServer();
   pinMode(LATCHPIN, OUTPUT);
   pinMode(CLOCKPIN, OUTPUT);
   pinMode(DATAPIN, OUTPUT);
   Serial.begin(9600);
+  while(!Serial);
+  setupServer();
 }
 
 void loop() {
@@ -395,5 +399,11 @@ void loop() {
       delay(DELAY);
     }
     lastDisplayTime = millis();
+  }
+  else{
+    digitalWrite(LATCHPIN, LOW);
+      shiftOut(DATAPIN, CLOCKPIN, LSBFIRST, 0 << 2);
+      digitalWrite(LATCHPIN, HIGH);
+      delay(DELAY);
   }
 }
