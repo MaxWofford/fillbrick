@@ -146,7 +146,7 @@ function updateImage(){
 		var binary = '';
 		for(var j=imageHeight;j<5;j++)
 			binary += '0';
-		result[i] = parseInt((imageData[i]+binary).split('').reverse().join(''), 2);
+		result[i] = parseInt((imageData[i]+binary), 2);
 	}
 	
 	// Create form for sending POST
@@ -157,7 +157,7 @@ function updateImage(){
 	// Create input for size and image
 	var image = document.createElement("input");
 	image.setAttribute('name', "image");
-	image.setAttribute('value', JSON.stringify(result.reverse()));
+	image.setAttribute('value', JSON.stringify(result));
 	image.setAttribute('type', "hidden");
 	
 	// Add all inputs to the form and send

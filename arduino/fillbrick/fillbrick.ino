@@ -1,6 +1,5 @@
 #include <SPI.h>
 #include <Ethernet.h>
-#include "MemoryFree.h"
 
 // Mac address
 byte mac[] = { 0x90, 0xA2, 0xDA, 0x0F, 0x12, 0x93 };
@@ -206,10 +205,17 @@ byte* stringToBytes(const char* s, int sLength){
     int ascii = s[a];
     for(int b = 0; b < CHARACTER_WIDTH ; b++)
     {
-      tempy[(sLength-1-a)*CHARACTER_WIDTH+(CHARACTER_WIDTH-1-b)] = ch_lookup[ascii*CHARACTER_WIDTH+b];
+      tempy[a*CHARACTER_WIDTH+b] = flip(ch_lookup[ascii*CHARACTER_WIDTH+b]);
     }
   }
   return tempy;
+}
+
+byte flip(byte original){
+  byte newByte = 0;
+  for(int i=0;i<BOARDHEIGHT;i++)
+    bitWrite(newByte, BOARDHEIGHT-i-1, bitRead(original, i));
+  return newByte;
 }
 
 void setupServer(){
@@ -257,126 +263,127 @@ void updateData(bool first) {
 void getCurrentData(bool first){
   // Get the body of the current response
   while(client.connected() && !client.available());
-    int contentLength = 0;
-    char* body;
-    while(client.available()){
-      char c = client.read();
-      if(contentLength==0){
-        bool found = true;
-        if(c==CONTENT_LENGTH_STRING[0]){
-          for(int i=1;i<CONTENT_LENGTH_STRING_LENGTH && found;i++)
-            if((c=client.read())!=CONTENT_LENGTH_STRING[i])
-              found = false;
-        }
-        else
-          found = false;
-        if(found){
-          while((c = client.read())!='\n')
-            if((c-'0')>=0 && (c-'0')<10)
-              contentLength = contentLength*10+(c-'0');
-        }
+  int contentLength = 0;
+  char* body;
+  while(client.available()){
+    char c = client.read();
+    if(contentLength==0){
+      bool found = true;
+      if(c==CONTENT_LENGTH_STRING[0]){
+        for(int i=1;i<CONTENT_LENGTH_STRING_LENGTH && found;i++)
+          if((c=client.read())!=CONTENT_LENGTH_STRING[i])
+            found = false;
       }
-      else{
-        if(c<=32){
-          body = new char[contentLength+1];
-          c = client.read();
-          for(int i=0;i<contentLength;i++, c = client.read())
-            body[i] = c;
-          body[contentLength] = 0;
-          break;
-        }
+      else
+        found = false;
+      if(found){
+        while((c = client.read())!='\n')
+          if((c-'0')>=0 && (c-'0')<10)
+            contentLength = contentLength*10+(c-'0');
       }
-      while(c!='\n' && c!=-1)
+    }
+    else{
+      if(c<=32){
+        body = new char[contentLength+1];
         c = client.read();
-    }Serial.println(body);
-
-    // Get the length of the new data
-    dataLength = 0;
-    for(int i=0;i<contentLength;i++){
-      
-      // skip escaped characters
-      while(body[i]=='\\')
-        i+=2;
-
-      // Find where length is and grab it
-      bool found = true;
-      if(body[i]==',' || body[i]=='{'){
-        for(int j=0;j<LENGTH_FIELD_LENGTH && found;j++)
-          if(body[i+j+1]!=LENGTH_FIELD[j])
-            found = false;
-      }
-      else
-        found = false;
-      if(found){
-        for(int j=i+LENGTH_FIELD_LENGTH+1;body[j]>=32 && body[j]!=',' && body[j]!='}';j++)
-          if((body[j]-'0')>=0 && (body[j]-'0')<10)
-            dataLength = dataLength*10+(body[j]-'0');
-        break;
-      }
-    }Serial.println(dataLength);
-
-    // Reset the data array to empty with the new size
-    if(!first)
-      delete[] data;
-    data = new byte[dataLength];
-
-
-    // Get all the data from the body
-    int curData = 0;
-    for(int i=0;i<contentLength;i++){
-       // Find where the bytes are and grab them
-      bool found = true;
-      if(body[i]==',' || body[i]=='{'){
-        for(int j=0;j<DATA_FIELD_LENGTH && found;j++)
-          if(body[i+j+1]!=DATA_FIELD[j])
-            found = false;
-      }
-      else
-        found = false;
-      if(found){
-        for(int j=i+DATA_FIELD_LENGTH+2;body[j]!=']' && body[j+1]>=32;j++){
-          if(body[j]=='\"'){
-            j++;
-            int k = j;
-            for(;body[j]!='\"';j++){
-              // skip esacped characters and quoted text
-              while(body[j]=='\\')
-                j+=2;
-              while(body[j]=='\"'){
-                while(body[j]!='\"'){
-                  j++;
-                  while(body[j]=='\\')
-                    j+=2;
-                }
-              }
-            }
-//            for(int l=0;l<(k-1)*CHARACTER_WIDTH;l++)
-//              data[curData++] = 0;
-            k = j-k;
-            char* newString = new char[k+1];
-            newString[k] = 0;
-            for(int l=k;l>0;l--)
-              newString[k-l] = body[j-l];
-            Serial.println(newString);
-            byte* newData = stringToBytes(newString, k);
-            for(int l=0;l<k*CHARACTER_WIDTH;l++)
-              data[curData++] = newData[l];
-            delete[] newString;
-            delete[] newData;
-          }
-          else{
-            int newData = 0;
-            for(;body[j]!=',' && body[j]!=']';j++)
-              if((body[j]-'0')>=0 && (body[j]-'0')<10)
-                newData = newData*10+(body[j]-'0');
-            data[curData++] = newData;
-          }
-        }
+        for(int i=0;i<contentLength;i++, c = client.read())
+          body[i] = c;
+        body[contentLength] = 0;
         break;
       }
     }
-    for(int i=0;i<dataLength;i++)
-      Serial.println(data[i]);
+    while(c!='\n' && c!=-1)
+      c = client.read();
+  }Serial.println(body);
+
+  // Get the length of the new data
+  dataLength = 0;
+  for(int i=0;i<contentLength;i++){
+    
+    // skip escaped characters
+    while(body[i]=='\\')
+      i+=2;
+
+    // Find where length is and grab it
+    bool found = true;
+    if(body[i]==',' || body[i]=='{'){
+      for(int j=0;j<LENGTH_FIELD_LENGTH && found;j++)
+        if(body[i+j+1]!=LENGTH_FIELD[j])
+          found = false;
+    }
+    else
+      found = false;
+    if(found){
+      for(int j=i+LENGTH_FIELD_LENGTH+1;body[j]>=32 && body[j]!=',' && body[j]!='}';j++)
+        if((body[j]-'0')>=0 && (body[j]-'0')<10)
+          dataLength = dataLength*10+(body[j]-'0');
+      break;
+    }
+  }Serial.println(dataLength);
+
+  // Reset the data array to empty with the new size
+  if(!first)
+    delete[] data;
+  data = new byte[dataLength];
+
+
+  // Get all the data from the body
+  int curData = 0;
+  for(int i=0;i<contentLength;i++){
+     // Find where the bytes are and grab them
+    bool found = true;
+    if(body[i]==',' || body[i]=='{'){
+      for(int j=0;j<DATA_FIELD_LENGTH && found;j++)
+        if(body[i+j+1]!=DATA_FIELD[j])
+          found = false;
+    }
+    else
+      found = false;
+    if(found){
+      for(int j=i+DATA_FIELD_LENGTH+2;body[j]!=']' && body[j+1]>=32;j++){
+        if(body[j]=='\"'){
+          j++;
+          int k = j;
+          for(;body[j]!='\"';j++){
+            // skip esacped characters and quoted text
+            while(body[j]=='\\')
+              j+=2;
+            while(body[j]=='\"'){
+              while(body[j]!='\"'){
+                j++;
+                while(body[j]=='\\')
+                  j+=2;
+              }
+            }
+          }
+//            for(int l=0;l<(k-1)*CHARACTER_WIDTH;l++)
+//              data[curData++] = 0;
+          k = j-k;
+          char* newString = new char[k+1];
+          newString[k] = 0;
+          for(int l=k;l>0;l--)
+            newString[k-l] = body[j-l];
+          Serial.println(newString);
+          byte* newData = stringToBytes(newString, k);
+          for(int l=0;l<k*CHARACTER_WIDTH;l++)
+            data[curData++] = newData[l];
+          delete[] newString;
+          delete[] newData;
+        }
+        else{
+          int newData = 0;
+          for(;body[j]!=',' && body[j]!=']';j++)
+            if((body[j]-'0')>=0 && (body[j]-'0')<10)
+              newData = newData*10+(body[j]-'0');
+          data[curData++] = newData;
+        }
+      }
+      break;
+    }
+  }
+  delete[] body;
+  for(int i=0;i<dataLength;i++)
+    Serial.println(data[i]);
 }
 
 void setup() {
@@ -389,15 +396,12 @@ void setup() {
 }
 
 void loop() {
-  Serial.print("freeMemory()=");
-  Serial.println(freeMemory());
   if(millis() - lastDisplayTime > DISPLAY_BREAK_TIME){
     updateData(false);
     for(int a = 0 ; a < dataLength; a++)
     {
       digitalWrite(LATCHPIN, LOW);
       shiftOut(DATAPIN, CLOCKPIN, LSBFIRST, data[a] << 2);
-      Serial.print(a);
       digitalWrite(LATCHPIN, HIGH);
       delay(DELAY);
     }
@@ -405,8 +409,8 @@ void loop() {
   }
   else{
     digitalWrite(LATCHPIN, LOW);
-      shiftOut(DATAPIN, CLOCKPIN, LSBFIRST, 0 << 2);
-      digitalWrite(LATCHPIN, HIGH);
-      delay(DELAY);
+    shiftOut(DATAPIN, CLOCKPIN, LSBFIRST, 0 << 2);
+    digitalWrite(LATCHPIN, HIGH);
+    delay(DELAY);
   }
 }
