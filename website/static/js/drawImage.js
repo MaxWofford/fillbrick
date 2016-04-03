@@ -142,8 +142,12 @@ window.onmousedown = function(){
 function updateImage(){
 	var result = [];
 	console.log(JSON.stringify(imageData));
-	for(var i=0;i<imageData.length;i++)
-		result[i] = parseInt(imageData[i], 2);
+	for(var i=0;i<imageData.length;i++){
+		var binary = '';
+		for(var j=imageHeight;j<5;j++)
+			binary += '0';
+		result[i] = parseInt(imageData[i]+binary, 2);
+	}
 	document.getElementById("result").innerHTML = JSON.stringify(result);
 }
 
