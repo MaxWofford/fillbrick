@@ -6,29 +6,17 @@ const int CLOCKPIN = 11;
 const int DATAPIN = 13;
 // Number of pins
 const int BOARDHEIGHT = 5;
-// Delay
+// Refresh rate
 const int DELAY = 200;
 
-void sendData(byte data) {
-  // 001010
-  for (int i = 0; i < boardHeight; i++) {
-    digitalWrite(LATCHPIN, LOW);
-    // shift out the bits:
-    digitalWrite(DATAPIN, data[i]);
-    //take the latch pin high so the LEDs will light up:
-    digitalWrite(LATCHPIN, HIGH);
-    Serial.print(bitRead(data, i));
-  }
-  //digitalWrite(0);
-  Serial.print(0);
-  Serial.println();
-}
+// Test pattern smiley face
+const int data[10] = {7,1,13,1,1,13,1,7,0,0};
 
 void diagonalLines() {
   // count from 1 (0x00001) to 32 (0x10000)
   // note: the furthest right pin is disconnected; drop the right most digit in binary
-  for (byte a = 1; a< 32;a*=2) {
-    sendData(a);
+  for (byte a = 1; a < 8; a++) {
+    shiftOut(DATAPIN, CLOCKPIN, LSBFIRST, a);
     delay(DELAY);
   }
 }
@@ -41,5 +29,12 @@ void setup() {
 }
 
 void loop() {
-  diagonalLines()
+  for (int a = 0; a < 10; a++) {
+    // Bit shift twice because the first pin on each shift register is unused
+    int b = data[a] << 2;
+    digitalWrite(LATCHPIN, LOW);
+    shiftOut(DATAPIN, CLOCKPIN, LSBFIRST, b);
+    digitalWrite(LATCHPIN, HIGH);
+    delay(DELAY);
+  }
 }
