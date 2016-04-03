@@ -3,7 +3,10 @@ var server = require('http').createServer(),
 		app = express(),
 		port = 80;
 var app = express();
-var data = {bytes:[7,1,13,1,1,13,1,7], length:8}
+const CHARACTER_SIZE = 4;
+var data = {bytes:[7,1,13,1,1,13,1,7,0,0,0,0,"apple"], length:0};
+for(var i=0;i<data.bytes.length;i++)
+	data.length += parseInt(data.bytes[i])===data.bytes[i] ? 1 : data.bytes[i].length*CHARACTER_SIZE;
 
 app.set('view engine', 'ejs');
 app.use(express.static('static'));
@@ -13,6 +16,7 @@ app.get('/', function(req, res) {
 });
 
 app.get('/data', function(req, res) {
+	res.setHeader('Content-Type', 'application/json');
     res.send(JSON.stringify(data));
 });
 
