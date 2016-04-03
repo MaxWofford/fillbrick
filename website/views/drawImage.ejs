@@ -1,33 +1,47 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<title>Dungeon Generation</title>
-		<style>
-			#image-canvas { overflow: auto; }
-     		fieldset{display:inline;}
-		</style>
-		<meta charset="utf-8">
-		<script src="https://cdn.rawgit.com/konvajs/konva/0.11.1/konva.min.js" type="text/javascript"></script>
-		<script src="js/drawImage.js" type="text/javascript"></script>
-	</head>
-	<body>
-		<div id="image-canvas"></div>
-		<form id="drawForm">
-			<fieldset>
-	    		<legend>Size</legend>
-	    		Width (1-48): <br />
-	    		<input name="width" value="4"><br />
-	    		Height (1-5): <br />
-	    		<input name="height" value="5"><br />
-	    		<input type="submit" value="Change Size">
-	    	</fieldset>
-	    	<fieldset>
-	    		<legend>Drawing Color</legend>
-	    		<input type="radio" name="color" value="0">Off<br />
-	    		<input type="radio" name="color" value="1" checked>On<br />
-	    	</fieldset>
-		</form><br />
-		<button onclick="updateImage()">Submit</button>
-		<p>Result: <span id="result"></span></p>
+  <head>
+    <title>Philbrick</title>
+    <meta charset="utf-8">
+    <script src="https://cdn.rawgit.com/konvajs/konva/0.11.1/konva.min.js" type="text/javascript"></script>
+    <script src="js/drawImage.js" type="text/javascript"></script>
+    <link rel="stylesheet" href="https://rawgit.com/ComputerScienceHouse/CSHPublicSite/master/resources/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/main.css">
+  </head>
+  <body>
+    <!-- navbar -->
+    <div class="navbar navbar-fixed-top navbar-inverse" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#"><img src="/img/csh_logo_white.svg" alt="CSH" class="logo"></a>
+        </div>
+        <div class="collapse navbar-collapse">
+        </div><!-- /.nav-collapse -->
+      </div><!-- /.container -->
+    </div>
+    <div class="container-fluid">
+      <div class="pdp-ribbon">
+        <div id="image-canvas"></div>
+      </div>
+      <div class="panel panel-csh">
+        <form id="drawForm">
+          <fieldset>
+            <legend>Size</legend>
+            Width (1-48): <br />
+            <input name="width" value="4"><br />
+            Height (1-5): <br />
+            <input name="height" value="5"><br />
+            <input type="submit" value="Change Size">
+          </fieldset>
+          <fieldset>
+            <legend>Drawing Color</legend>
+            <input type="radio" name="color" value="0">Off<br />
+            <input type="radio" name="color" value="1" checked>On<br />
+          </fieldset>
+        </form><br />
+        <button onclick="updateImage()">Submit</button>
+        <p>Result: <span id="result"></span></p>
+      </div>
+    </div>
 	</body>
 </html>
